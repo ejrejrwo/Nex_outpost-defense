@@ -4,6 +4,8 @@
 
 `OUTPOST 2D`는 넥토리얼(NEXON COMPANY) 지원 포트폴리오를 위해 만든 Unreal Engine 5.8 native C++ 2D 방어 게임입니다. 1440×960 기준의 한 화면 아레나에서 준비 시간의 자원 배분과 실시간 전투를 연결했습니다. 게임 규칙, 입력, 화면, 저장을 C++로 구현했습니다.
 
+**[Windows 게임 다운로드](https://github.com/ejrejrwo/Nex_outpost-defense/releases/download/v2.0.0/Outpost2D-Windows.zip)** · [배포 버전과 소스 압축 파일](https://github.com/ejrejrwo/Nex_outpost-defense/releases/tag/v2.0.0) · [기술 개요](Docs/TECHNICAL_OVERVIEW.md) · [검증 기록](Docs/VALIDATION.md)
+
 ## 게임 흐름
 
 30초 동안 광석을 채굴하고 화력 또는 보호구를 5초 동안 강화합니다. 이후 7명·10명·13명의 세 웨이브, 총 30명의 공세를 상대하며 마지막에는 최종 보스 `BREAKER`가 등장합니다. `hard`와 `practice` 모드를 제공합니다.
@@ -31,7 +33,7 @@ native 2.0.0에서는 전투 중 채굴·강화·방벽 운반까지 한 흐름�
 
 ### Windows 패키지
 
-`Outpost2D-Windows.zip`을 압축 해제한 뒤 `PLAY.cmd` 또는 `Outpost2D.exe`를 실행합니다. 패키지에는 실행에 필요한 Unreal 런타임이 포함됩니다. 프로젝트 루트의 `Play.cmd`는 로컬 `Release\Windows\Outpost2D.exe`를 찾아 실행합니다.
+[Releases에서 `Outpost2D-Windows.zip`을 다운로드](https://github.com/ejrejrwo/Nex_outpost-defense/releases/tag/v2.0.0)하고 전체 압축을 해제한 뒤 `PLAY.cmd` 또는 `Outpost2D.exe`를 실행합니다. Unreal Editor 설치 없이 플레이할 수 있으며, 패키지에는 실행에 필요한 Unreal 런타임이 포함됩니다. 프로젝트 루트의 `Play.cmd`는 로컬 `Release\Windows\Outpost2D.exe`를 찾아 실행합니다.
 
 ### 소스 프로젝트
 

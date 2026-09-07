@@ -1,0 +1,11 @@
+/Binaries/
+/Intermediate/
+/Saved/
+/DerivedDataCache/
+/Release/
+/.vs/
+/Build/*/FileOpenOrder/
+*.sln
+*.suo
+*.VC.db
+__pycache__/

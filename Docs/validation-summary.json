@@ -1,0 +1,128 @@
+{
+  "version": "2.0.0",
+  "date": "2026-09-07",
+  "engine": "Unreal Engine 5.8.0",
+  "platform": "Windows 11 / DX11 SM5",
+  "captureResolution": "1440x960",
+  "packaging": "Windows Development BuildCookRun succeeded",
+  "automation": {
+    "tests": [
+      {
+        "name": "Outpost.Simulation.Combat.DashCollisionAndWindup",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Combat.MiningForgeAndRestWork",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Combat.ThirtyEnemyAssault",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Combat.WallGuardsAndRepath",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Modes.BossRosterAndScore",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Navigation.FixedTargetAcrossFrameRates",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Navigation.MovingGoalNoBacktracking",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Pause.FreezesState",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Persistence.SeparateModeRecords",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Projectile.NearbyEnemyOffset",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.PlacementRejectsOverlapAndSealedRoute",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.PrepMiningAndTwoUpgrades",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.UpgradeAndWallPlacement",
+        "state": "Success"
+      }
+    ],
+    "reportCreatedOnUTC": "2026.09.07-00.02.46",
+    "notRun": 0,
+    "failed": 0,
+    "passed": 13,
+    "inProcess": 0
+  },
+  "packagedRuns": [
+    {
+      "won": true,
+      "mode": "hard",
+      "rank": 2,
+      "hp": 68,
+      "kills": 30,
+      "time": 74.58,
+      "oreMined": 24,
+      "wallMoves": 0,
+      "shots": 156,
+      "hits": 112,
+      "dashes": 2,
+      "score": 7302,
+      "inputFailures": 0
+    },
+    {
+      "won": true,
+      "mode": "practice",
+      "rank": 2,
+      "hp": 100,
+      "kills": 30,
+      "time": 68.05,
+      "oreMined": 24,
+      "wallMoves": 0,
+      "shots": 130,
+      "hits": 86,
+      "dashes": 0,
+      "score": 7720,
+      "inputFailures": 0
+    }
+  ],
+  "editorWallBuildRun": {
+    "won": true,
+    "mode": "hard",
+    "rank": 1,
+    "hp": 21,
+    "kills": 30,
+    "time": 80.67,
+    "oreMined": 10,
+    "wallMoves": 1,
+    "shots": 179,
+    "hits": 144,
+    "dashes": 5,
+    "score": 6740,
+    "inputFailures": 0
+  },
+  "input": {
+    "failed": 0,
+    "checks": 13,
+    "method": "Unreal simulated key events and HUD callbacks; not OS mouse injection"
+  },
+  "executableSHA256": "2A8EB85493FC91C061DF4B808D4D061F9AB71E0BAD5C53E5B3C6233C52ED1D4C",
+  "pakSHA256": "9F5791633E0C1734DE7692498850297212B923D41F0B60B4FAFF03B9F4F721D1",
+  "limitations": [
+    "Automated controller results do not estimate human win rates.",
+    "OS keyboard/mouse playthrough and audible sound were not directly verified.",
+    "Automated runs preserve the actual player SaveGame file."
+  ]
+}

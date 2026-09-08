@@ -6,6 +6,7 @@
 class ACameraActor;
 class USoundWave;
 class UOutpostSaveGame;
+class UTexture2D;
 
 struct FOutpostParticle
 {
@@ -25,6 +26,9 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
     Outpost::FSimulation Sim;
+    UPROPERTY() TObjectPtr<UTexture2D> ArtSprites;
+    UPROPERTY() TObjectPtr<UTexture2D> ArtFloor;
+    UPROPERTY() TObjectPtr<UTexture2D> ArtKeyArt;
     TArray<FOutpostParticle> Particles;
     TArray<FOutpostRing> Rings;
     float WaveBannerRemaining = 0;

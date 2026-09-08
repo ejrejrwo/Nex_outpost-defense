@@ -5,7 +5,7 @@
 class AOutpostGameMode;
 class UCanvas;
 
-/** Crisp, texture-free arena presentation drawn in the same projection as the simulation. */
+/** Blender sprite atlas and generated materials, projected onto simulation ground positions. */
 class OUTPOST2D_API FOutpostArenaRenderer
 {
 public:

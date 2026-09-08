@@ -2,44 +2,40 @@
 
 ## 프로젝트 경계
 
-`Outpost2D.uproject`는 Unreal Engine 5.8 native C++ 프로젝트입니다. 기존 웹 버전은 초기 프로토타입 참고 자료이며 native 런타임과 코드를 공유하지 않습니다. 게임 규칙은 `Source/Outpost2D/OutpostSimulation.*`의 `Outpost::FSimulation`, Unreal 연결은 `AOutpostGameMode`, 아레나 렌더링은 `FOutpostArenaRenderer`, HUD는 `AOutpostHUD`, 입력은 `AOutpostPlayerController`가 담당합니다.
+`Outpost2D.uproject`는 Unreal Engine 5.8 native C++ 프로젝트다. 규칙은 `Source/Outpost2D/OutpostSimulation.*`의 `Outpost::FSimulation`, Unreal 연결은 `AOutpostGameMode`, 아레나 렌더링은 `FOutpostArenaRenderer`, HUD와 입력은 각각 `AOutpostHUD`와 `AOutpostPlayerController`가 담당한다. 기존 웹 버전은 초기 프로토타입 참고 자료이며 native 런타임과 코드를 공유하지 않는다.
 
-`Config/DefaultEngine.ini`는 `/Game/Outpost/Maps/OutpostArena`를 기본 맵으로 지정합니다. 1440×960 기준의 한 화면 직교 아레나를 사용하며, 최종 실행·빌드·검증 기록은 `Docs/VALIDATION.md`에 버전별로 남깁니다.
+`Config/DefaultEngine.ini`는 `/Game/Outpost/Maps/OutpostArena`를 기본 맵으로 지정한다. 한 화면 직교 아레나와 Unreal Canvas를 유지한다. 현재 문서의 native 2.1.0 시각 패스는 아트 연결을 다루며, 30초 준비·3개 웨이브·총 30명 적이라는 실제 게임플레이 구성을 바꾸지 않는다.
 
-## 렌더링과 게임 연결
+## 시각 에셋 연결
 
-`FOutpostArenaRenderer`는 Unreal Canvas API로 바닥, 입구, 광석, 대장간, 방벽, 적, 탄환, 플레이어와 효과를 절차적으로 그립니다. 이전 PNG 아틀라스와 import 머티리얼은 보관용 레거시 자료이며 native 2.0.0의 주 렌더링 경로가 아닙니다. `AOutpostHUD`는 같은 Canvas 좌표계에서 HUD, 조작 안내, 모드 선택, 결과와 최고 기록을 그립니다.
+`AOutpostGameMode`는 다음 텍스처를 `UPROPERTY`로 보유하고 BeginPlay에서 `/Game/Outpost/DesignV3` 경로로 로드한다.
 
-`AOutpostGameMode`는 입력을 `FInput`으로 모으고 `FSimulation`을 진행한 뒤 이벤트 큐를 소비해 사운드와 효과를 처리합니다. 화면은 상태 배열을 읽어 그리므로 규칙 계층이 Actor나 렌더러에 직접 의존하지 않습니다.
+| 속성 | 에셋 |
+| --- | --- |
+| `ArtSprites` | `T_SpritesAtlas` — Blender 절차적 geometry를 68° 직교 카메라로 렌더링한 8×8 방향별 아틀라스 |
+| `ArtFloor` | `T_ArenaFloor` — ImageGen 금속 바닥 |
+| `ArtKeyArt` | `T_KeyArt` — ImageGen 메뉴 타이틀 아트 |
+
+`FOutpostArenaRenderer`와 HUD는 모두 Unreal Canvas에서 텍스처를 그린다. 아틀라스 방향·셀·앵커는 `SourceArt/DesignV3/sprites_atlas.json`을 따른다. 월드 오브젝트 레이어는 ground Y를 깊이로 안정 정렬한다. 바닥과 타이틀 아트가 로드되지 않거나 아틀라스가 없으면 해당 부분은 기존 절차적 Canvas 표현으로 폴백한다.
+
+아틀라스의 `generator`와 `turret` 셀은 미래 디자인 에셋이다. 현재 기능성 생성기나 포탑 게임 오브젝트, 충돌체, 규칙으로 연결하지 않는다. 지형 충돌과 적 경로 검사는 `FSimulation`의 기존 고정 격자 규칙을 계속 사용한다.
+
+새 PNG import는 `Tools/import_design_v3.py`가 `/Game/Outpost/DesignV3`에 추가로 수행한다. 기존 `SourceArt/arena.png`, `SourceArt/sprites.png`, `/Game/Outpost/Art`, `Tools/import_assets.py`는 레거시 자료로 남아 있으며 DesignV3 파이프라인에서 실행할 대상이 아니다.
 
 ## 고정 간격 시뮬레이션
 
-`FSimulation`은 Unreal Actor·Canvas를 참조하지 않는 값 중심 규칙 계층입니다. 플레이어, 광석, 방벽, 적, 탄환, 강화 작업, 통계와 이벤트를 보관합니다. GameMode는 외부 `DeltaSeconds`를 누적하고 `1/60`초 단위로 `Sim.Tick`을 호출합니다. 발사·채굴·강화·피격·웨이브·승패 이벤트는 사운드와 화면 효과의 입력입니다.
+`FSimulation`은 Unreal Actor와 Canvas를 참조하지 않는 값 중심 규칙 계층이다. 플레이어, 광석, 방벽, 적, 탄환, 강화 작업, 통계와 이벤트를 보관한다. GameMode는 외부 `DeltaSeconds`를 누적하고 `1/60`초 간격으로 `Sim.Tick`을 호출한 뒤 이벤트를 사운드와 화면 효과로 전달한다. 렌더러는 이 상태를 읽어 그리며 규칙을 소유하지 않는다.
 
-## native 2.0.0 규칙
+입구 방어는 28×17 고정 격자와 상·하·좌·우 BFS를 사용한다. 우클릭 이동, 적 추적, 방벽 변경 후 재경로 탐색은 같은 격자 규칙을 공유한다. 방벽 배치는 경계·기존 물체·플레이어·살아 있는 적과의 겹침, 광석·대장간 접근, 양쪽 입구에서 돌아오는 경로를 검사한다. 이 검사는 시각 에셋과 독립적이다.
 
-30초 준비 후 7명·10명·13명의 세 웨이브가 이어지며 총 30명입니다. 세 번째 웨이브 마지막에는 최종 보스 `BREAKER`가 등장합니다. `hard`와 `practice`는 같은 아레나를 사용합니다. 총·곡괭이·맨손은 준비·전투·휴식 중 전환할 수 있고, 총은 도구 1에서만 발사합니다.
+탄환은 이전 위치에서 다음 위치까지 선분을 검사하고 낮은 방벽은 통과한다. 회피는 고정 틱 동안 충돌을 나누어 검사한다. 저장 기록은 `UOutpostSaveGame`의 `OutpostNative2` 슬롯에 hard/practice를 별도 보관한다.
 
-광석은 전투와 휴식 중에도 채굴할 수 있습니다. 화력·보호구 강화는 5초 동안 진행되고 전투 중에도 적의 공격은 계속됩니다. E로 취소하면 광석은 환불되지만 이미 흐른 시간은 복구되지 않습니다. 준비 단계에서만 남은 시간이 5초보다 적을 때 강화를 거부합니다.
+## 현재 게임플레이와 검증 범위
 
-방벽을 들면 이동 속도는 112가 되고 사격·회피가 잠깁니다. 살아 있는 적과 겹치는 배치는 거부하며, 별도의 경로 검사로 적을 완전히 가두는 배치도 거부합니다. 준비에서 첫 전투로 넘어갈 때 운반 중인 방벽은 원위치로 돌아가고 무기로 전환합니다. 웨이브 사이 휴식에서 다음 전투로 넘어갈 때는 이동·작업·운반 상태를 유지합니다. 회피는 3.2초 재사용 대기와 0.16초 지속 시간을 사용합니다.
+실제 게임플레이는 30초 준비 뒤 세 웨이브에서 총 30명의 적을 상대하고, Canvas HUD에서 도구·채굴·강화·방벽·승패 상태를 표시한다. 아트 import와 렌더링 연결은 이 규칙을 변경하지 않는다. native 2.1.0의 최종 C++ 테스트 13개와 Windows 패키징이 성공했다. 배포본에서 도전 모드의 방벽 빌드와 연습 모드의 화력 빌드를 보스까지 자동 완주하고 세 아트 에셋 로드를 확인했다. 실제 결과와 검증 한계는 [v2.1 검증 기록](VALIDATION_2.1.md)에 있다.
 
-`BREAKER`는 hard에서 649 HP, practice에서 467 HP이며 공격 예고 0.85초, 공격 반경 100, 피해 38(hard)/23(practice)을 사용합니다. HP가 절반 아래가 되면 이동 속도가 18% 증가하고 예고 시간이 0.62초, 공격 반경이 86으로 바뀝니다. 보스와 연속 공세의 세부 실행 결과는 검증 기록에서 확인합니다.
+성장·타워·추가 공세·경제 확장은 [방어 확장 설계안](BUILD_DEFENSE_PLAN.md)의 구현 전 제안이다. 해당 문서의 수치와 단계는 현재 게임 기능으로 해석하지 않는다.
 
-최고 기록은 `UOutpostSaveGame`을 `OutpostNative2` 슬롯에 저장하고 hard/practice를 별도 필드로 관리합니다. 실행 중 진행 상태와 온라인 랭킹은 저장하지 않습니다. 준비 단계와 전투 중 채굴·방벽 이동은 `CombatOreMined`, `CombatWallMoves` 통계로 구분합니다.
+## AI와 도구 사용 범위
 
-## 경로와 방벽 검증
-
-맵은 28×17 고정 격자입니다. 적 경로와 우클릭 이동은 상·하·좌·우 4방향 BFS를 사용하며, 목표 셀은 움직이는 플레이어와 방벽 변경에 따라 갱신합니다. 플레이어의 연속 입력은 두 축을 처리해 8방향 이동을 허용합니다. 작은 동적 맵에서 즉시 경로를 다시 계산하기 쉽지만 대형·다층 지형에는 적합하지 않습니다.
-
-직선 시야가 열리면 적은 플레이어를 직접 추적하고, 막히면 현재 목표 셀의 BFS 경로를 사용합니다. 플레이어와 적 이동에는 반지름 기반 충돌 검사를 적용하고, 시야 판정은 반지름만큼 확장한 셀과 선분의 교차를 검사하며, 실제 이동은 최대 5 단위씩 나누어 충돌을 확인합니다.
-
-방벽 배치 전에는 경계·기존 물체·플레이어·살아 있는 적과의 겹침을 검사합니다. 양쪽 입구에서 플레이어에게 돌아오는 경로와 광석·대장간 접근성도 확인하고, 적을 가두지 않는 배치만 커밋합니다. 낮은 방벽은 적의 이동·근접 공격을 막지만 탄환은 통과합니다.
-
-## 탄환과 회피
-
-탄환은 조준 방향으로 생성되고 매 고정 틱의 이전 위치에서 다음 위치까지 선분을 검사합니다. 첫 틱에는 플레이어 원점에서 시작하는 muzzle segment를 사용해 근거리 표적 누락을 줄입니다. 탄환과 낮은 방벽의 충돌은 검사하지 않습니다. 회피는 짧은 이동 구간으로 나누어 충돌을 확인합니다.
-
-## 검증과 AI 사용 범위
-
-빌드·자동 테스트·GPU 플레이의 버전별 결과는 `Docs/VALIDATION.md`에 기록합니다. 자동 조작 결과를 실제 사람 플레이의 승률로 해석하지 않습니다. AI는 C++ 구현 보조, ImageGen 레거시 아트, 표준 라이브러리 사운드, 문서화와 검증 절차 보조에 참여했습니다. 규칙과 제품 방향은 사람의 기획 판단으로 정하고, 생성·보조 범위는 에셋 기록과 소스 문서에 구분해 남깁니다.
+Blender 4.5.9 portable runtime과 `Tools/blender_outpost_art.py`는 아틀라스 geometry와 렌더 장면을 만든다. ImageGen은 `arena_floor.png`와 `key_art.png` 및 관련 프롬프트를 만들었고, `SourceArt/DesignV3/imagegen-prompts.json`에 기록을 보존한다. Blender runtime의 출처 파일은 공식 서버에서 받아 SHA를 확인했으며, 실행 중 `Saved` 산출물은 Git과 export에서 제외한다. 이 작업에서 Blender MCP 연결이나 Higgsfield 사용을 주장하지 않는다.

@@ -4,6 +4,7 @@
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
+#include "Engine/Texture2D.h"
 #include "Fonts/FontMeasure.h"
 #include "Framework/Application/SlateApplication.h"
 #include "GameFramework/PlayerController.h"
@@ -81,6 +82,18 @@ AOutpostGameMode* AOutpostHUD::GetOutpostGameMode() const
 void AOutpostHUD::DrawPanel(const FVector2D& Position, const FVector2D& Size, const FLinearColor& Color)
 {
     FCanvasTileItem Tile(Position, Size, Color);
+    Tile.BlendMode = SE_BLEND_Translucent;
+    Canvas->DrawItem(Tile);
+}
+
+void AOutpostHUD::DrawTexture(UTexture2D* Texture, const FVector2D& Position, const FVector2D& Size,
+    const FVector2D& UV0, const FVector2D& UV1, const FLinearColor& Tint)
+{
+    if (!Texture || !Texture->GetResource())
+    {
+        return;
+    }
+    FCanvasTileItem Tile(Position, Texture->GetResource(), Size, UV0, UV1, Tint);
     Tile.BlendMode = SE_BLEND_Translucent;
     Canvas->DrawItem(Tile);
 }
@@ -179,66 +192,81 @@ void AOutpostHUD::DrawHUD()
 void AOutpostHUD::DrawHeader(AOutpostGameMode& GameMode)
 {
     const Outpost::FSimulation& Sim = GameMode.Sim;
-    const float H = 96.f * UiScale;
-    DrawPanel(FVector2D::ZeroVector, FVector2D(ScreenWidth, H), Navy);
+    const float H = 82.f * UiScale;
+    DrawPanel(FVector2D::ZeroVector, FVector2D(ScreenWidth, H), FLinearColor(Navy.R, Navy.G, Navy.B, .96f));
     DrawPanel(FVector2D(0.f, H - 2.f * UiScale), FVector2D(ScreenWidth, 2.f * UiScale), Cyan * FLinearColor(1.f, 1.f, 1.f, .58f));
 
-    const float Margin = 24.f * UiScale;
-    DrawLabel(TEXT("OUTPOST"), FVector2D(Margin, 13.f * UiScale), Ink, .86f, false, false, EOutpostFont::Large);
-    DrawLabel(TEXT("180"), FVector2D(Margin + 162.f * UiScale, 13.f * UiScale), Cyan,
-        .86f, false, false, EOutpostFont::Large);
-    DrawLabel(TEXT("LAST SIGNAL  /  30초 준비 → 3 WAVE → BOSS"),
-        FVector2D(Margin, 59.f * UiScale), Muted, .50f, false, false, EOutpostFont::Medium);
+    const float Margin = 18.f * UiScale;
+    DrawLabel(TEXT("OUTPOST"), FVector2D(Margin, 12.f * UiScale), Ink, .67f, false, false, EOutpostFont::Large);
+    DrawLabel(TEXT("180"), FVector2D(Margin + 128.f * UiScale, 12.f * UiScale), Cyan,
+        .67f, false, false, EOutpostFont::Large);
+    DrawLabel(TEXT("LAST SIGNAL"), FVector2D(Margin, 49.f * UiScale), Muted, .42f);
 
-    const float StatusX = 382.f * UiScale;
-    DrawLine(FVector2D(StatusX - 18.f * UiScale, 14.f * UiScale),
-        FVector2D(StatusX - 18.f * UiScale, H - 15.f * UiScale), Hairline);
+    const float StatusX = 226.f * UiScale;
+    DrawPanel(FVector2D(StatusX, 10.f * UiScale), FVector2D(270.f, 58.f) * UiScale,
+        FLinearColor(Panel.R, Panel.G, Panel.B, .82f));
+    DrawPanel(FVector2D(StatusX, 10.f * UiScale), FVector2D(3.f, 58.f) * UiScale, Amber);
 
     FLinearColor PhaseColor = Cyan;
     if (Sim.Phase == Outpost::EPhase::Combat) PhaseColor = Amber;
     if ((Sim.Phase == Outpost::EPhase::Prep && Sim.PrepRemaining <= 10.f) || Sim.Phase == Outpost::EPhase::Lost) PhaseColor = Red;
-    DrawLabel(PhaseText(Sim), FVector2D(StatusX, 15.f * UiScale), PhaseColor, .69f, false, false, EOutpostFont::Medium);
+    DrawLabel(PhaseText(Sim), FVector2D(StatusX + 15.f * UiScale, 16.f * UiScale), PhaseColor, .59f);
     DrawLabel(FString::Printf(TEXT("WAVE %d / 3    KILLS %02d / %d"), Sim.Wave, Sim.Kills, Outpost::TotalEnemies),
-        FVector2D(StatusX, 55.f * UiScale), Muted, .49f, false, false, EOutpostFont::Medium);
+        FVector2D(StatusX + 15.f * UiScale, 45.f * UiScale), Muted, .41f);
 
-    const float StatsX = 660.f * UiScale;
-    DrawLine(FVector2D(StatsX - 18.f * UiScale, 14.f * UiScale),
-        FVector2D(StatsX - 18.f * UiScale, H - 15.f * UiScale), Hairline);
-    DrawLabel(FString::Printf(TEXT("ORE  %03d"), Sim.Ore), FVector2D(StatsX, 14.f * UiScale), Amber, .64f);
-    DrawLabel(FString::Printf(TEXT("HP  %03d / %03d"), FMath::CeilToInt(Sim.PlayerHP), FMath::CeilToInt(Sim.MaxHP)),
-        FVector2D(StatsX + 116.f * UiScale, 14.f * UiScale), Ink, .59f);
-    DrawBar(FVector2D(StatsX + 116.f * UiScale, 48.f * UiScale), FVector2D(140.f * UiScale, 6.f * UiScale),
+    const float StatsX = 510.f * UiScale;
+    DrawPanel(FVector2D(StatsX, 10.f * UiScale), FVector2D(112.f, 58.f) * UiScale,
+        FLinearColor(Panel.R, Panel.G, Panel.B, .82f));
+    DrawLabel(TEXT("ORE"), FVector2D(StatsX + 13.f * UiScale, 16.f * UiScale), Muted, .38f);
+    DrawLabel(FString::Printf(TEXT("%03d"), Sim.Ore), FVector2D(StatsX + 13.f * UiScale, 39.f * UiScale), Amber, .59f);
+    DrawPanel(FVector2D(632.f, 10.f) * UiScale, FVector2D(244.f, 58.f) * UiScale,
+        FLinearColor(Panel.R, Panel.G, Panel.B, .82f));
+    DrawLabel(TEXT("SUIT HP"), FVector2D(645.f, 16.f) * UiScale, Muted, .38f);
+    DrawLabel(FString::Printf(TEXT("%03d / %03d"), FMath::CeilToInt(Sim.PlayerHP), FMath::CeilToInt(Sim.MaxHP)),
+        FVector2D(720.f, 15.f) * UiScale, Ink, .47f);
+    DrawBar(FVector2D(645.f, 44.f) * UiScale, FVector2D(218.f, 7.f) * UiScale,
         Sim.PlayerHP / FMath::Max(1.f, Sim.MaxHP), Sim.PlayerHP < Sim.MaxHP * .3f ? Red : Cyan, PanelBright);
-    DrawLabel(FString::Printf(TEXT("FIRE  %s"), *RankText(Sim.Rank)), FVector2D(StatsX, 57.f * UiScale), Cyan, .47f);
-    DrawLabel(FString::Printf(TEXT("ARMOR  %s"), Sim.ArmorRank > 0 ? TEXT("I") : TEXT("—")),
-        FVector2D(StatsX + 116.f * UiScale, 57.f * UiScale), Sim.ArmorRank > 0 ? Cyan : Muted, .47f);
+    DrawLabel(FString::Printf(TEXT("화력 %s"), *RankText(Sim.Rank)), FVector2D(886.f, 18.f) * UiScale, Cyan, .43f);
+    DrawLabel(FString::Printf(TEXT("보호구 %s"), Sim.ArmorRank > 0 ? TEXT("I") : TEXT("—")),
+        FVector2D(886.f, 45.f) * UiScale, Sim.ArmorRank > 0 ? Cyan : Muted, .41f);
 
     const FString ModeText = Sim.Mode == Outpost::EMode::Hard ? TEXT("HARD") : TEXT("PRACTICE");
-    DrawLabel(ModeText, FVector2D(ScreenWidth - 220.f * UiScale, 17.f * UiScale),
-        Sim.Mode == Outpost::EMode::Hard ? Red : Green, .48f);
-    const FVector2D SoundPos(ScreenWidth - 128.f * UiScale, 55.f * UiScale);
+    DrawLabel(ModeText, FVector2D(ScreenWidth - 205.f * UiScale, 18.f * UiScale),
+        Sim.Mode == Outpost::EMode::Hard ? Red : Green, .43f);
+    const FVector2D SoundPos(ScreenWidth - 124.f * UiScale, 42.f * UiScale);
     DrawButton(GameMode.bSound ? TEXT("SFX ON") : TEXT("SFX OFF"), TEXT("SOUND"), SoundPos,
-        FVector2D(98.f, 27.f) * UiScale, false, GameMode.bSound, 20, .51f);
+        FVector2D(104.f, 28.f) * UiScale, false, GameMode.bSound, 20, .45f);
 }
 
 void AOutpostHUD::DrawFooter(AOutpostGameMode& GameMode)
 {
     const Outpost::FSimulation& Sim = GameMode.Sim;
-    const float H = 100.f * UiScale;
+    const float H = 88.f * UiScale;
     const float Y = ScreenHeight - H;
     DrawPanel(FVector2D(0.f, Y), FVector2D(ScreenWidth, H), Navy);
     DrawPanel(FVector2D(0.f, Y), FVector2D(ScreenWidth, 2.f * UiScale), Cyan * FLinearColor(1.f, 1.f, 1.f, .58f));
 
-    const float ToolW = 146.f * UiScale;
-    const float Gap = 7.f * UiScale;
-    const float ToolY = Y + 17.f * UiScale;
+    const float ToolW = 134.f * UiScale;
+    const float Gap = 6.f * UiScale;
+    const float ToolY = Y + 13.f * UiScale;
     const bool bCanChangeTool = Sim.CanWork() && Sim.JobRemaining <= 0.f && !Sim.bCarrying && Sim.DashRemaining <= 0.f;
-    DrawButton(TEXT("1  블래스터"), TEXT("TOOL_1"), FVector2D(22.f * UiScale, ToolY),
-        FVector2D(ToolW, 46.f * UiScale), false, Sim.Tool == 1, 2, .61f, bCanChangeTool);
-    DrawButton(TEXT("2  곡괭이"), TEXT("TOOL_2"), FVector2D(22.f * UiScale + ToolW + Gap, ToolY),
-        FVector2D(ToolW, 46.f * UiScale), false, Sim.Tool == 2, 2, .61f, bCanChangeTool);
-    DrawButton(TEXT("3  방벽 운반"), TEXT("TOOL_3"), FVector2D(22.f * UiScale + (ToolW + Gap) * 2.f, ToolY),
-        FVector2D(ToolW, 46.f * UiScale), false, Sim.Tool == 3, 2, .58f, bCanChangeTool);
+    const float ToolsX = 18.f * UiScale;
+    DrawButton(TEXT("1  블래스터"), TEXT("TOOL_1"), FVector2D(ToolsX, ToolY),
+        FVector2D(ToolW, 40.f * UiScale), false, Sim.Tool == 1, 2, .53f, bCanChangeTool);
+    DrawButton(TEXT("2  곡괭이"), TEXT("TOOL_2"), FVector2D(ToolsX + ToolW + Gap, ToolY),
+        FVector2D(ToolW, 40.f * UiScale), false, Sim.Tool == 2, 2, .53f, bCanChangeTool);
+    DrawButton(TEXT("3  방벽"), TEXT("TOOL_3"), FVector2D(ToolsX + (ToolW + Gap) * 2.f, ToolY),
+        FVector2D(ToolW, 40.f * UiScale), false, Sim.Tool == 3, 2, .53f, bCanChangeTool);
+    if (GameMode.ArtSprites && GameMode.ArtSprites->GetResource())
+    {
+        for (int32 ToolIndex = 0; ToolIndex < 3; ++ToolIndex)
+        {
+            const FVector2D IconPos(ToolsX + (ToolW + Gap) * ToolIndex + 8.f * UiScale, ToolY + 8.f * UiScale);
+            const float V0 = static_cast<float>(ToolIndex) / 8.f;
+            DrawTexture(GameMode.ArtSprites.Get(), IconPos, FVector2D(24.f) * UiScale,
+                FVector2D(0.f, V0), FVector2D(1.f / 8.f, V0 + 1.f / 8.f));
+        }
+    }
 
     const bool bDashReady = Sim.Phase == Outpost::EPhase::Combat && Sim.DashCooldown <= 0.f
         && Sim.JobRemaining <= 0.f && !Sim.bCarrying && Sim.DashRemaining <= 0.f && !Sim.bPaused;
@@ -249,20 +277,20 @@ void AOutpostHUD::DrawFooter(AOutpostGameMode& GameMode)
     else if (Sim.Phase != Outpost::EPhase::Combat) DashText = TEXT("전투 전용");
     else if (Sim.DashCooldown <= 0.f) DashText = TEXT("SPACE  READY");
     else DashText = FString::Printf(TEXT("SPACE  %.1fs"), Sim.DashCooldown);
-    const float DashX = 22.f * UiScale + (ToolW + Gap) * 3.f;
-    DrawButton(DashText, TEXT("DASH"), FVector2D(DashX, ToolY), FVector2D(132.f, 46.f) * UiScale,
-        false, bDashReady, 2, .48f, bDashReady);
+    const float DashX = ToolsX + (ToolW + Gap) * 3.f;
+    DrawButton(DashText, TEXT("DASH"), FVector2D(DashX, ToolY), FVector2D(118.f, 40.f) * UiScale,
+        false, bDashReady, 2, .43f, bDashReady);
 
     DrawLabel(TEXT("LMB 사용  ·  RMB 이동  ·  E 상호작용/취소  ·  F 보호구  ·  R 회전"),
-        FVector2D(22.f * UiScale, Y + 73.f * UiScale), Muted, .49f);
+        FVector2D(18.f * UiScale, Y + 64.f * UiScale), Muted, .39f);
 
-    const float HintX = 665.f * UiScale;
-    DrawLine(FVector2D(HintX - 24.f * UiScale, Y + 17.f * UiScale),
-        FVector2D(HintX - 24.f * UiScale, Y + 80.f * UiScale), Hairline);
-    DrawLabel(TEXT("TACTICAL FEED"), FVector2D(HintX, Y + 17.f * UiScale), Cyan, .47f);
+    const float HintX = 600.f * UiScale;
+    DrawLine(FVector2D(HintX - 20.f * UiScale, Y + 13.f * UiScale),
+        FVector2D(HintX - 20.f * UiScale, Y + 73.f * UiScale), Hairline);
+    DrawLabel(TEXT("TACTICAL FEED"), FVector2D(HintX, Y + 13.f * UiScale), Cyan, .40f);
     const FString Hint = GameMode.ToastRemaining > 0.f && !GameMode.Toast.IsEmpty() ? GameMode.Toast : Sim.Hint();
     const FString HintText = Hint.IsEmpty() ? TEXT("신호 기지를 방어할 준비를 하십시오.") : Hint;
-    const float DefaultHintScale = .58f;
+    const float DefaultHintScale = .49f;
     const float HintMaxWidth = FMath::Max(120.f * UiScale, ScreenWidth - HintX - 180.f * UiScale);
     float HintScale = DefaultHintScale;
     if (FSlateApplication::IsInitialized() && FSlateApplication::Get().GetRenderer())
@@ -274,24 +302,24 @@ void AOutpostHUD::DrawFooter(AOutpostGameMode& GameMode)
             HintScale *= (HintMaxWidth / Measured.X) * .98f;
         }
     }
-    DrawLabel(HintText, FVector2D(HintX, Y + 47.f * UiScale), Ink, HintScale);
+    DrawLabel(HintText, FVector2D(HintX, Y + 40.f * UiScale), Ink, HintScale);
 
     if (Sim.JobRemaining > 0.f)
     {
         const float Progress = 1.f - Sim.JobRemaining / Outpost::ForgeSeconds;
         const FLinearColor JobColor = Sim.JobKind == Outpost::EUpgradeKind::Armor ? Cyan : Amber;
-        DrawBar(FVector2D(HintX, Y + 76.f * UiScale), FVector2D(330.f * UiScale, 4.f * UiScale),
+        DrawBar(FVector2D(HintX, Y + 68.f * UiScale), FVector2D(330.f * UiScale, 4.f * UiScale),
             Progress, JobColor, PanelBright);
     }
     else if (Sim.bMining)
     {
-        DrawBar(FVector2D(HintX, Y + 76.f * UiScale), FVector2D(330.f * UiScale, 4.f * UiScale),
+        DrawBar(FVector2D(HintX, Y + 68.f * UiScale), FVector2D(330.f * UiScale, 4.f * UiScale),
             Sim.MineProgress / Outpost::MineSeconds, Cyan, PanelBright);
     }
 
     DrawButton(Sim.bPaused ? TEXT("계속") : TEXT("II  일시정지"), TEXT("PAUSE"),
-        FVector2D(ScreenWidth - 142.f * UiScale, ToolY), FVector2D(120.f, 46.f) * UiScale,
-        false, Sim.bPaused, 20, .52f);
+        FVector2D(ScreenWidth - 124.f * UiScale, ToolY), FVector2D(106.f, 40.f) * UiScale,
+        false, Sim.bPaused, 20, .45f);
 }
 
 void AOutpostHUD::DrawWorldHud(AOutpostGameMode& GameMode)
@@ -404,29 +432,39 @@ void AOutpostHUD::DrawWorldHud(AOutpostGameMode& GameMode)
     }
 
     const FVector2D Player = GameMode.ScreenPoint(Sim.Player);
-    DrawPanel(Player + FVector2D(-48.f, -43.f) * UiScale, FVector2D(96.f, 18.f) * UiScale,
-        FLinearColor(Navy.R, Navy.G, Navy.B, .78f));
-    DrawLabel(FString::Printf(TEXT("%s  ·  ARM %d"), *RankText(Sim.Rank), Sim.ArmorRank),
-        Player + FVector2D(0.f, -34.f) * UiScale, Sim.HurtRemaining > 0.f ? Red : Cyan,
-        .57f, true, true, EOutpostFont::Small);
-
-    for (const Outpost::FMine& Mine : Sim.Mines)
+    if (Sim.HurtRemaining > 0.f)
     {
+        DrawPanel(Player + FVector2D(-25.f, -62.f) * UiScale, FVector2D(50.f, 17.f) * UiScale,
+            Srgb(38, 4, 9, 220));
+        DrawLabel(TEXT("피격"), Player + FVector2D(0.f, -53.5f) * UiScale,
+            Red, .43f, true, true, EOutpostFont::Small);
+    }
+
+    const int32 NearbyMine = Sim.NearestMine();
+    for (int32 MineIndex = 0; MineIndex < Sim.Mines.Num(); ++MineIndex)
+    {
+        const Outpost::FMine& Mine = Sim.Mines[MineIndex];
         if (Mine.Remaining <= 0)
         {
             continue;
         }
+        if (MineIndex != NearbyMine && Mine.Rect.Id != Sim.ActiveMine)
+        {
+            continue;
+        }
         const FVector2D P = GameMode.ScreenPoint(Mine.Rect.Center());
-        DrawPanel(P + FVector2D(-36.f, -43.f) * UiScale, FVector2D(72.f, 18.f) * UiScale,
-            FLinearColor(Navy.R, Navy.G, Navy.B, .74f));
-        DrawLabel(FString::Printf(TEXT("ORE %03d"), Mine.Remaining), P + FVector2D(0.f, -34.f) * UiScale,
-            Amber, .57f, true, true, EOutpostFont::Small);
+        DrawPanel(P + FVector2D(-34.f, -38.f) * UiScale, FVector2D(68.f, 16.f) * UiScale,
+            FLinearColor(Navy.R, Navy.G, Navy.B, .72f));
+        DrawLabel(FString::Printf(TEXT("광석 %03d"), Mine.Remaining), P + FVector2D(0.f, -30.f) * UiScale,
+            Amber, .43f, true, true, EOutpostFont::Small);
     }
 
     const FVector2D Forge = GameMode.ScreenPoint(Sim.Forge.Center());
     const bool bForgeJob = Sim.JobRemaining > 0.f;
-    DrawPanel(Forge + FVector2D(-104.f, -58.f) * UiScale, FVector2D(208.f, 21.f) * UiScale,
-        FLinearColor(Navy.R, Navy.G, Navy.B, .82f));
+    const bool bForgeActive = bForgeJob || (Sim.CanWork() && Sim.NearForge() && Sim.DashRemaining <= 0.f && !Sim.bCarrying);
+    const FVector2D ForgePanelSize = bForgeActive ? FVector2D(200.f, 20.f) : FVector2D(58.f, 15.f);
+    DrawPanel(Forge + FVector2D(-ForgePanelSize.X * .5f, -54.f) * UiScale, ForgePanelSize * UiScale,
+        FLinearColor(Navy.R, Navy.G, Navy.B, bForgeActive ? .84f : .55f));
     FString ForgeText;
     FLinearColor ForgeColor = Amber;
     if (bForgeJob)
@@ -435,28 +473,33 @@ void AOutpostHUD::DrawWorldHud(AOutpostGameMode& GameMode)
         ForgeText = FString::Printf(TEXT("%s 제작 %.1fs  ·  E 취소"),
             Sim.JobKind == Outpost::EUpgradeKind::Armor ? TEXT("보호구") : TEXT("화력"), Sim.JobRemaining);
     }
-    else
+    else if (bForgeActive)
     {
         const FString FireCost = Sim.Rank >= Outpost::MaxRank ? TEXT("MAX") : FString::FromInt(Sim.UpgradeCost());
         const FString ArmorCost = Sim.ArmorRank > 0 ? TEXT("MAX") : TEXT("10");
-        ForgeText = FString::Printf(TEXT("FORGE  ·  E 화력 %s  /  F 보호구 %s  ·  5초"), *FireCost, *ArmorCost);
+        ForgeText = FString::Printf(TEXT("E 화력 %s  ·  F 보호구 %s  ·  제작 5초"), *FireCost, *ArmorCost);
     }
-    DrawLabel(ForgeText, Forge + FVector2D(0.f, -47.f) * UiScale, ForgeColor,
-        .53f, true, true, EOutpostFont::Small);
+    else
+    {
+        ForgeText = TEXT("FORGE");
+        ForgeColor = Muted;
+    }
+    DrawLabel(ForgeText, Forge + FVector2D(0.f, -44.f) * UiScale, ForgeColor,
+        bForgeActive ? .46f : .36f, true, true, EOutpostFont::Small);
     if (!bForgeJob && Sim.CanWork() && Sim.NearForge() && Sim.DashRemaining <= 0.f && !Sim.bCarrying)
     {
-        DrawLine(Forge + FVector2D(0.f, -57.f) * UiScale, Forge + FVector2D(0.f, -38.f) * UiScale, Hairline);
+        DrawLine(Forge + FVector2D(0.f, -54.f) * UiScale, Forge + FVector2D(0.f, -34.f) * UiScale, Hairline);
         const bool bFireAvailable = Sim.Rank < Outpost::MaxRank && Sim.Ore >= Sim.UpgradeCost();
         const bool bArmorAvailable = Sim.ArmorRank <= 0 && Sim.Ore >= 10;
         if (bFireAvailable)
         {
-            AddHitBox(Forge + FVector2D(-104.f, -58.f) * UiScale,
-                FVector2D(103.f, 21.f) * UiScale, TEXT("FORGE"), true, 4);
+            AddHitBox(Forge + FVector2D(-100.f, -54.f) * UiScale,
+                FVector2D(99.f, 20.f) * UiScale, TEXT("FORGE"), true, 4);
         }
         if (bArmorAvailable)
         {
-            AddHitBox(Forge + FVector2D(1.f, -58.f) * UiScale,
-                FVector2D(103.f, 21.f) * UiScale, TEXT("ARMOR"), true, 4);
+            AddHitBox(Forge + FVector2D(1.f, -54.f) * UiScale,
+                FVector2D(99.f, 20.f) * UiScale, TEXT("ARMOR"), true, 4);
         }
     }
 
@@ -545,6 +588,105 @@ void AOutpostHUD::DrawOverlay(AOutpostGameMode& GameMode)
 
     DrawPanel(FVector2D::ZeroVector, FVector2D(ScreenWidth, ScreenHeight), WithAlpha(Srgb(2, 7, 14), .83f));
     AddHitBox(FVector2D::ZeroVector, FVector2D(ScreenWidth, ScreenHeight), TEXT("OVERLAY_BLOCK"), true, 40);
+
+    if (bMenu)
+    {
+        // The key art is composed with its action on the right. A dense, opaque rail on
+        // the left keeps the Korean copy readable while leaving most of the illustration intact.
+        const float MenuW = 1180.f * UiScale;
+        const float MenuH = 700.f * UiScale;
+        const FVector2D Menu((ScreenWidth - MenuW) * .5f, (ScreenHeight - MenuH) * .5f);
+        DrawPanel(Menu - FVector2D(2.f * UiScale), FVector2D(MenuW, MenuH) + FVector2D(4.f * UiScale),
+            FLinearColor(Cyan.R, Cyan.G, Cyan.B, .30f));
+        DrawPanel(Menu, FVector2D(MenuW, MenuH), NavySoft);
+        if (GameMode.ArtKeyArt && GameMode.ArtKeyArt->GetResource())
+        {
+            DrawTexture(GameMode.ArtKeyArt.Get(), Menu, FVector2D(MenuW, MenuH),
+                FVector2D(0.f, .055f), FVector2D(1.f, .945f), FLinearColor(.84f, .90f, .94f, 1.f));
+        }
+        else
+        {
+            DrawPanel(Menu + FVector2D(520.f, 0.f) * UiScale, FVector2D(660.f, 700.f) * UiScale,
+                Srgb(7, 25, 35));
+            for (int32 I = 0; I < 8; ++I)
+            {
+                DrawLine(Menu + FVector2D(560.f + I * 88.f, 0.f) * UiScale,
+                    Menu + FVector2D(560.f + I * 88.f, 700.f) * UiScale,
+                    FLinearColor(Cyan.R, Cyan.G, Cyan.B, .055f));
+            }
+        }
+
+        const float RailW = 520.f;
+        DrawPanel(Menu, FVector2D(RailW, 700.f) * UiScale, FLinearColor(Navy.R, Navy.G, Navy.B, .975f));
+        for (int32 I = 0; I < 10; ++I)
+        {
+            const float Alpha = .88f * (1.f - static_cast<float>(I) / 10.f);
+            DrawPanel(Menu + FVector2D(RailW + I * 13.f, 0.f) * UiScale, FVector2D(13.f, 700.f) * UiScale,
+                FLinearColor(Navy.R, Navy.G, Navy.B, Alpha));
+        }
+        DrawPanel(Menu + FVector2D(520.f, 570.f) * UiScale, FVector2D(660.f, 130.f) * UiScale,
+            FLinearColor(Navy.R, Navy.G, Navy.B, .67f));
+        DrawPanel(Menu, FVector2D(4.f, 700.f) * UiScale, Cyan);
+
+        const FVector2D Copy = Menu + FVector2D(34.f, 0.f) * UiScale;
+        DrawLabel(TEXT("SECTOR 01  /  LAST TRANSMISSION"), Copy + FVector2D(0.f, 31.f) * UiScale,
+            Cyan, .43f);
+        DrawLabel(TEXT("OUTPOST"), Copy + FVector2D(0.f, 68.f) * UiScale,
+            Ink, 1.04f, false, false, EOutpostFont::Large);
+        DrawLabel(TEXT("180"), Copy + FVector2D(199.f, 68.f) * UiScale,
+            Cyan, 1.04f, false, false, EOutpostFont::Large);
+        DrawLabel(TEXT("최후의 신호"), Copy + FVector2D(2.f, 122.f) * UiScale,
+            Amber, .61f);
+        DrawLine(Copy + FVector2D(0.f, 162.f) * UiScale, Copy + FVector2D(450.f, 162.f) * UiScale,
+            Hairline, 1.f);
+
+        DrawLabel(TEXT("30초 동안 준비하고 세 번의 공세를 버티십시오."),
+            Copy + FVector2D(0.f, 185.f) * UiScale, Ink, .52f);
+        DrawLabel(TEXT("광석 채굴과 장비 강화, 이동식 방벽이 생존 수단입니다."),
+            Copy + FVector2D(0.f, 216.f) * UiScale, Muted, .43f);
+        DrawLabel(TEXT("3 WAVE 이후 최종 보스가 진입합니다."),
+            Copy + FVector2D(0.f, 244.f) * UiScale, Red, .43f);
+
+        DrawLabel(TEXT("BEST RECORD"), Copy + FVector2D(0.f, 286.f) * UiScale, Cyan, .39f);
+        DrawPanel(Copy + FVector2D(0.f, 312.f) * UiScale, FVector2D(216.f, 62.f) * UiScale,
+            FLinearColor(Panel.R, Panel.G, Panel.B, .86f));
+        DrawPanel(Copy + FVector2D(230.f, 312.f) * UiScale, FVector2D(216.f, 62.f) * UiScale,
+            FLinearColor(Panel.R, Panel.G, Panel.B, .86f));
+        DrawLabel(TEXT("HARD"), Copy + FVector2D(14.f, 321.f) * UiScale, Red, .37f);
+        DrawLabel(FString::Printf(TEXT("%06d"), GameMode.BestScore(Outpost::EMode::Hard)),
+            Copy + FVector2D(14.f, 344.f) * UiScale, Ink, .53f);
+        DrawLabel(TEXT("PRACTICE"), Copy + FVector2D(244.f, 321.f) * UiScale, Green, .37f);
+        DrawLabel(FString::Printf(TEXT("%06d"), GameMode.BestScore(Outpost::EMode::Practice)),
+            Copy + FVector2D(244.f, 344.f) * UiScale, Ink, .53f);
+
+        DrawLabel(TEXT("조작"), Copy + FVector2D(0.f, 402.f) * UiScale, Cyan, .40f);
+        DrawLabel(TEXT("WASD / RMB 이동    ·    1 / 2 / 3 도구"),
+            Copy + FVector2D(0.f, 430.f) * UiScale, Ink, .43f);
+        DrawLabel(TEXT("LMB 사용    ·    E 상호작용 / 취소    ·    F 보호구"),
+            Copy + FVector2D(0.f, 458.f) * UiScale, Ink, .41f);
+        DrawLabel(TEXT("SPACE 회피    ·    R 방벽 회전    ·    ESC 일시정지"),
+            Copy + FVector2D(0.f, 486.f) * UiScale, Muted, .40f);
+
+        DrawLabel(TEXT("모드 선택"), Copy + FVector2D(0.f, 531.f) * UiScale, Cyan, .40f);
+        DrawButton(TEXT("도전 시작  /  HARD"), TEXT("START"),
+            Copy + FVector2D(0.f, 557.f) * UiScale, FVector2D(216.f, 51.f) * UiScale,
+            true, false, 50, .52f);
+        DrawButton(TEXT("연습 시작  /  PRACTICE"), TEXT("PRACTICE"),
+            Copy + FVector2D(230.f, 557.f) * UiScale, FVector2D(216.f, 51.f) * UiScale,
+            false, false, 50, .47f);
+        DrawButton(GameMode.bSound ? TEXT("SFX  ON") : TEXT("SFX  OFF"), TEXT("SOUND"),
+            Copy + FVector2D(0.f, 627.f) * UiScale, FVector2D(116.f, 38.f) * UiScale,
+            false, GameMode.bSound, 50, .43f);
+        DrawLabel(TEXT("준비 중 ENTER를 누르면 즉시 전투가 시작됩니다."),
+            Copy + FVector2D(136.f, 638.f) * UiScale, Muted, .36f);
+
+        DrawLabel(TEXT("30 SEC PREP"), Menu + FVector2D(550.f, 610.f) * UiScale, Cyan, .41f);
+        DrawLabel(TEXT("03 WAVES"), Menu + FVector2D(748.f, 610.f) * UiScale, Amber, .41f);
+        DrawLabel(TEXT("FINAL BOSS"), Menu + FVector2D(916.f, 610.f) * UiScale, Red, .41f);
+        DrawLabel(TEXT("광석 · 강화 · 이동식 방벽"), Menu + FVector2D(550.f, 649.f) * UiScale, Ink, .47f);
+        return;
+    }
+
     const float CardW = (bMenu ? 680.f : bResult ? 650.f : 560.f) * UiScale;
     const float CardH = (bMenu ? 590.f : bResult ? 520.f : 330.f) * UiScale;
     const FVector2D Card((ScreenWidth - CardW) * .5f, (ScreenHeight - CardH) * .5f);

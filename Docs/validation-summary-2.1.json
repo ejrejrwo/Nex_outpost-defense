@@ -1,0 +1,139 @@
+{
+  "version": "2.1.0",
+  "date": "2026-09-08",
+  "engine": "Unreal Engine 5.8.0",
+  "platform": "Windows 11 / DX11 SM5",
+  "captureResolution": "1440x960",
+  "packaging": "Windows Development BuildCookRun succeeded",
+  "automation": {
+    "reportCreatedOnUTC": "2026.09.08-14.49.51",
+    "passed": 13,
+    "failed": 0,
+    "notRun": 0,
+    "inProcess": 0,
+    "tests": [
+      {
+        "name": "Outpost.Simulation.Combat.DashCollisionAndWindup",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Combat.MiningForgeAndRestWork",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Combat.ThirtyEnemyAssault",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Combat.WallGuardsAndRepath",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Modes.BossRosterAndScore",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Navigation.FixedTargetAcrossFrameRates",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Navigation.MovingGoalNoBacktracking",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Pause.FreezesState",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Persistence.SeparateModeRecords",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.Projectile.NearbyEnemyOffset",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.PlacementRejectsOverlapAndSealedRoute",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.PrepMiningAndTwoUpgrades",
+        "state": "Success"
+      },
+      {
+        "name": "Outpost.Simulation.UpgradeAndWallPlacement",
+        "state": "Success"
+      }
+    ]
+  },
+  "packagedRuns": [
+    {
+      "won": true,
+      "mode": "hard",
+      "rank": 1,
+      "hp": 21,
+      "kills": 30,
+      "time": 80.67,
+      "oreMined": 10,
+      "wallMoves": 1,
+      "shots": 179,
+      "hits": 144,
+      "dashes": 5,
+      "score": 6740,
+      "inputFailures": 0,
+      "artAssetsLoaded": true
+    },
+    {
+      "won": true,
+      "mode": "practice",
+      "rank": 2,
+      "hp": 100,
+      "kills": 30,
+      "time": 68.05,
+      "oreMined": 24,
+      "wallMoves": 0,
+      "shots": 130,
+      "hits": 86,
+      "dashes": 0,
+      "score": 7720,
+      "inputFailures": 0,
+      "artAssetsLoaded": true
+    }
+  ],
+  "input": {
+    "checksPerRun": 13,
+    "failed": 0,
+    "method": "Unreal simulated key events and HUD callbacks; not OS mouse injection"
+  },
+  "art": {
+    "blender": "4.5.9",
+    "atlasDimensions": "2048x2048 RGBA",
+    "cells": 64,
+    "nonemptyCells": 64,
+    "minimumAlphaPaddingPixels": 25,
+    "loadedTextures": [
+      "T_SpritesAtlas",
+      "T_ArenaFloor",
+      "T_KeyArt"
+    ],
+    "runtimeVerified": true,
+    "screenshots": "Docs/Screenshots/v2.1",
+    "futureOnlyProps": [
+      "generator",
+      "turret"
+    ]
+  },
+  "hashesSHA256": {
+    "executable": "EB3179CE519FB1EEE55070805D4C7BD3365E12FD7AFF9F4D3FEE7FCBB82EC5D4",
+    "pak": "4D0AFC2E89A5F0837F813FC0F88DC654359929BE1D7E38454121E6CF35F333D7",
+    "ucas": "115CF2A15816BCA5E0C48EF6741787E4E1DF593E3ADD5F4AE0474B3874EEA62A",
+    "utoc": "69F52BDE800097097090A3308B6F0DE468CE2EEBA87E77604F2B1163F16F3324",
+    "spriteAtlas": "66A2C3E38520C97009F377BC2BE54165F712751A152DCEA1444145E1F95A8C2C"
+  },
+  "limitations": [
+    "Automated controller results do not estimate human win rates or enjoyment.",
+    "OS keyboard/mouse playthrough and audible sound were not directly verified.",
+    "Automated runs preserve the actual player SaveGame file.",
+    "Tower, economy, chance and additional wave mechanics are proposals, not implemented features."
+  ]
+}

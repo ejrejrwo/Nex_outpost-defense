@@ -57,7 +57,7 @@ if ($ReportFile.LastWriteTimeUtc -le $StartRoundSecond) {
 try { $Report = Get-Content -LiteralPath $ReportPath -Raw | ConvertFrom-Json }
 catch { throw "Packaged automation report is not valid JSON: $ReportPath" }
 
-foreach ($Property in @('won', 'mode', 'rank', 'kills', 'oreMined', 'wallMoves', 'inputFailures')) {
+foreach ($Property in @('won', 'mode', 'rank', 'kills', 'oreMined', 'wallMoves', 'inputFailures', 'artAssetsLoaded')) {
     if ($null -eq $Report.$Property) { throw "Packaged automation report is missing '$Property': $ReportPath" }
 }
 
@@ -69,7 +69,8 @@ $Checks = @(
     [pscustomobject]@{ Pass = ([int]$Report.kills -eq 30); Name = 'kills=30' },
     [pscustomobject]@{ Pass = ([int]$Report.rank -eq $Rank); Name = "rank=$Rank" },
     [pscustomobject]@{ Pass = ([int]$Report.oreMined -ge $MinimumOre); Name = "oreMined>=$MinimumOre" },
-    [pscustomobject]@{ Pass = ([int]$Report.wallMoves -ge $(if ($Rank -eq 1) { 1 } else { 0 })); Name = "wallMoves>=$(if ($Rank -eq 1) { 1 } else { 0 })" }
+    [pscustomobject]@{ Pass = ([int]$Report.wallMoves -ge $(if ($Rank -eq 1) { 1 } else { 0 })); Name = "wallMoves>=$(if ($Rank -eq 1) { 1 } else { 0 })" },
+    [pscustomobject]@{ Pass = ($Report.artAssetsLoaded -eq $true); Name = 'artAssetsLoaded=true' }
 )
 $FailedChecks = @($Checks | Where-Object { -not $_.Pass })
 if ($FailedChecks.Count) {

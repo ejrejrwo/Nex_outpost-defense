@@ -27,7 +27,7 @@ function Test-ExcludedSourcePath([string]$RelativePath) {
     foreach ($Name in $SourceExcludedNames) {
         if ($RelativePath -match "(^|/)$([regex]::Escape($Name))(/|$)") { return $true }
     }
-    return $RelativePath -match '(^|/)\.(sln|suo|VC\.db)$' -or $RelativePath -match '\.pdb$'
+    return $RelativePath -match '(^|/)\.(sln|suo|VC\.db)$' -or $RelativePath -match '\.(pdb|blend[0-9]+)$'
 }
 
 function Get-FilesForArchive([string]$Root, [string[]]$Folders, [string[]]$Files, [bool]$ExcludeSourceBuildFolders) {

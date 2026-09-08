@@ -9,3 +9,5 @@
 *.suo
 *.VC.db
 __pycache__/
+*.blend1
+*.blend2

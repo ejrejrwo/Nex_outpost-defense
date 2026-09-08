@@ -8,6 +8,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundWave.h"
+#include "Engine/Texture2D.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
@@ -32,6 +33,10 @@ AOutpostGameMode::AOutpostGameMode()
 void AOutpostGameMode::BeginPlay()
 {
     Super::BeginPlay();
+    ArtSprites = LoadObject<UTexture2D>(nullptr, TEXT("/Game/Outpost/DesignV3/T_SpritesAtlas.T_SpritesAtlas"));
+    ArtFloor = LoadObject<UTexture2D>(nullptr, TEXT("/Game/Outpost/DesignV3/T_ArenaFloor.T_ArenaFloor"));
+    ArtKeyArt = LoadObject<UTexture2D>(nullptr, TEXT("/Game/Outpost/DesignV3/T_KeyArt.T_KeyArt"));
+    UE_LOG(LogTemp, Display, TEXT("OUTPOST_ART sprites=%d floor=%d keyArt=%d"), ArtSprites != nullptr, ArtFloor != nullptr, ArtKeyArt != nullptr);
     Records = Cast<UOutpostSaveGame>(UGameplayStatics::LoadGameFromSlot(TEXT("OutpostNative2"), 0));
     if (!Records) Records = Cast<UOutpostSaveGame>(UGameplayStatics::CreateSaveGameObject(UOutpostSaveGame::StaticClass()));
     if (Records) bSound = Records->bSound;
@@ -342,8 +347,9 @@ void AOutpostGameMode::CaptureFrame(const FString& Name)
 void AOutpostGameMode::FinishAutomation()
 {
     bAutoFinished = true; CaptureClock = 0;
-    const FString Report = FString::Printf(TEXT("{\"won\":%s,\"mode\":\"%s\",\"rank\":%d,\"hp\":%.0f,\"kills\":%d,\"time\":%.2f,\"oreMined\":%d,\"wallMoves\":%d,\"shots\":%d,\"hits\":%d,\"dashes\":%d,\"score\":%d,\"inputFailures\":%d}"),
-        Sim.Phase == EPhase::Won ? TEXT("true") : TEXT("false"), bAutoPractice ? TEXT("practice") : TEXT("hard"), Sim.Rank, Sim.PlayerHP, Sim.Kills, Sim.Time, Sim.Stats.OreMined, Sim.Stats.WallMoves, Sim.Stats.Shots, Sim.Stats.Hits, Sim.Stats.Dashes, Sim.Score(), InputFailures);
+    const FString Report = FString::Printf(TEXT("{\"won\":%s,\"mode\":\"%s\",\"rank\":%d,\"hp\":%.0f,\"kills\":%d,\"time\":%.2f,\"oreMined\":%d,\"wallMoves\":%d,\"shots\":%d,\"hits\":%d,\"dashes\":%d,\"score\":%d,\"inputFailures\":%d,\"artAssetsLoaded\":%s}"),
+        Sim.Phase == EPhase::Won ? TEXT("true") : TEXT("false"), bAutoPractice ? TEXT("practice") : TEXT("hard"), Sim.Rank, Sim.PlayerHP, Sim.Kills, Sim.Time, Sim.Stats.OreMined, Sim.Stats.WallMoves, Sim.Stats.Shots, Sim.Stats.Hits, Sim.Stats.Dashes, Sim.Score(), InputFailures,
+        ArtSprites && ArtFloor && ArtKeyArt ? TEXT("true") : TEXT("false"));
     FFileHelper::SaveStringToFile(Report, *(FPaths::ProjectSavedDir() / FString::Printf(TEXT("autoplay-%s-rank%d.json"), bAutoPractice ? TEXT("practice") : TEXT("hard"), AutoRank)));
     UE_LOG(LogTemp, Display, TEXT("OUTPOST_AUTOPLAY %s"), *Report);
     if (bCapture) CaptureFrame(TEXT("04-result"));

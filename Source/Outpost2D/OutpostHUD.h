@@ -6,6 +6,7 @@
 
 class AOutpostGameMode;
 class UFont;
+class UTexture2D;
 enum class EOutpostFont : uint8 { Small, Medium, Large };
 
 UCLASS()
@@ -25,6 +26,9 @@ private:
 
     AOutpostGameMode* GetOutpostGameMode() const;
     void DrawPanel(const FVector2D& Position, const FVector2D& Size, const FLinearColor& Color);
+    void DrawTexture(UTexture2D* Texture, const FVector2D& Position, const FVector2D& Size,
+        const FVector2D& UV0 = FVector2D::ZeroVector, const FVector2D& UV1 = FVector2D(1.f, 1.f),
+        const FLinearColor& Tint = FLinearColor::White);
     void DrawLine(const FVector2D& Start, const FVector2D& End, const FLinearColor& Color, float Thickness = 1.f);
     void DrawLabel(const FString& Text, const FVector2D& Position, const FLinearColor& Color,
         float Scale = 1.f, bool bCenterX = false, bool bCenterY = false, EOutpostFont Font = EOutpostFont::Medium);

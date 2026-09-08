@@ -4,7 +4,7 @@
 
 `OUTPOST 2D`는 넥토리얼(NEXON COMPANY) 지원 포트폴리오를 위해 만든 Unreal Engine 5.8 native C++ 2D 방어 게임입니다. 1440×960 기준의 한 화면 아레나에서 준비 시간의 자원 배분과 실시간 전투를 연결했습니다. 게임 규칙, 입력, 화면, 저장을 C++로 구현했습니다.
 
-**[Windows 게임 다운로드](https://github.com/ejrejrwo/Nex_outpost-defense/releases/download/v2.1.0/Outpost2D-Windows.zip)** · [배포 버전과 소스 압축 파일](https://github.com/ejrejrwo/Nex_outpost-defense/releases/tag/v2.1.0) · [기술 개요](Docs/TECHNICAL_OVERVIEW.md) · [검증 기록](Docs/VALIDATION_2.1.md)
+**[Windows 게임 다운로드](https://github.com/ejrejrwo/Nex_outpost-defense/releases/download/v2.1.0/Outpost2D-Windows.zip?download=1)** · [배포 버전과 소스 압축 파일](https://github.com/ejrejrwo/Nex_outpost-defense/releases/tag/v2.1.0) · [기술 개요](Docs/TECHNICAL_OVERVIEW.md) · [검증 기록](Docs/VALIDATION_2.1.md)
 
 ## v2.1.0 그래픽 업데이트
 
